@@ -9,6 +9,10 @@ import akka.actor.typed.javadsl.Receive;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 public class WordFrequencyCounter extends AbstractBehavior<WordFrequencyCounter.Command> {
 
@@ -28,9 +32,18 @@ public class WordFrequencyCounter extends AbstractBehavior<WordFrequencyCounter.
     }
 
     private Behavior<Command> calculateFrequencies(CalculateFrequencies calculateFrequencies) {
-        getContext().getLog().info("Handling a sentence: '{}'", calculateFrequencies.getSentence());
+        String sentence = calculateFrequencies.getSentence();
+        getContext().getLog().info("Handling a sentence: '{}'", sentence);
+
+        Map<String, Long> frequencies = Stream.of(sentence.split("\\s"))
+                .collect(groupingBy(String::toString, counting()));
+
+        getContext().getLog().info("Calculated frequencies: '{}'", frequencies);
+
         return Behaviors.same();
     }
+
+
 
     //-------------------
 
