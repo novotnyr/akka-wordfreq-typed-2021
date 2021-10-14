@@ -1,5 +1,6 @@
 package sk.upjs.ics.kopr.akka;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
@@ -40,10 +41,10 @@ public class WordFrequencyCounter extends AbstractBehavior<WordFrequencyCounter.
 
         getContext().getLog().info("Calculated frequencies: '{}'", frequencies);
 
+        calculateFrequencies.getReplyTo().tell(new FrequenciesCalculated(frequencies));
+
         return Behaviors.same();
     }
-
-
 
     //-------------------
 
@@ -54,12 +55,19 @@ public class WordFrequencyCounter extends AbstractBehavior<WordFrequencyCounter.
     public static class CalculateFrequencies implements Command {
         private final String sentence;
 
-        public CalculateFrequencies(String sentence) {
+        private final ActorRef<FrequenciesCalculated> replyTo;
+
+        public CalculateFrequencies(String sentence, ActorRef<FrequenciesCalculated> replyTo) {
             this.sentence = sentence;
+            this.replyTo = replyTo;
         }
 
         public String getSentence() {
             return sentence;
+        }
+
+        public ActorRef<FrequenciesCalculated> getReplyTo() {
+            return replyTo;
         }
     }
 
